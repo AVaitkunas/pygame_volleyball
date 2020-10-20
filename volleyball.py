@@ -1,11 +1,10 @@
-import math
 import sys
 import pygame
 
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
 
-WHITE = (255,) * 3
+WHITE = (225,) * 3
 BLACK = (0,) * 3
 
 display = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -14,45 +13,47 @@ pygame.display.set_caption("Volleyball")
 
 
 class Ball:
-    def __init__(self, radius=10):
-        self.radius = radius
-        self.x = 10
-        self.y = 10
+    def __init__(self, diameter=50):
         self.speed_x = 10
-        self.speed_y = 10
-        self.gravity = 2
-        self.stopped = False
+        self.speed_y = 0
+        self.gravity = 1
+        self.is_stopped = False
+        ball_image = pygame.image.load("ball.png")
+        self.ball = pygame.transform.scale(ball_image, (diameter,) * 2)
+        self.ball_rect = self.ball.get_rect()
+        self.elasticity = 0.8
 
     def move(self):
-        # bounce from the walls
-        if not self.stopped:
-            if self.x + self.radius >= SCREEN_WIDTH or self.x - self.radius < 0:
-                self.speed_x *= -1
-            if self.y + self.radius >= SCREEN_HEIGHT or self.y - self.radius < 0:
-                self.speed_y *= -1
 
+        if not self.is_stopped:
             self.speed_y += self.gravity
+            if self.ball_rect.bottom + self.speed_y < SCREEN_HEIGHT:
+                self.ball_rect = self.ball_rect.move(self.speed_x, self.speed_y)
+            else:
+                self.ball_rect = self.ball_rect.move(self.speed_x, SCREEN_HEIGHT - self.ball_rect.bottom)
 
-            self.x += self.speed_x
-            self.y += self.speed_y
+            if self.ball_rect.right >= SCREEN_WIDTH or self.ball_rect.left < 0:
+                self.speed_x *= -self.elasticity
+            if self.ball_rect.bottom >= SCREEN_HEIGHT or self.ball_rect.top < 0:
+                self.speed_y *= -self.elasticity
 
-            # todo implement stop conditions
-
+            if self.ball_rect.bottom == SCREEN_HEIGHT and self.speed_y > -5:
+                self.is_stopped = True
 
     def show(self, surface):
-        pygame.draw.circle(surface, BLACK, (self.x, self.y), self.radius)
+        surface.blit(self.ball, self.ball_rect)
 
 
 pygame.init()
-ball = Ball()
+volleyball_ball = Ball()
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
-    pygame.time.delay(10)
-    ball.move()
+    pygame.time.delay(50)
+    volleyball_ball.move()
     display.fill(WHITE)
-    ball.show(surface=display)
+    volleyball_ball.show(surface=display)
     pygame.display.update()
