@@ -1,3 +1,4 @@
+import math
 import sys
 import pygame
 
@@ -17,19 +18,26 @@ class Ball:
         self.radius = radius
         self.x = 10
         self.y = 10
-        # velocity, vector, acceleration, acc. vector., mass todo write motion equation
-        self.speed_x = 1
-        self.speed_y = 1
+        self.speed_x = 10
+        self.speed_y = 10
+        self.gravity = 2
+        self.stopped = False
 
     def move(self):
         # bounce from the walls
-        if self.x > SCREEN_WIDTH or self.x < 0:
-            self.speed_x *= -1
-        if self.y > SCREEN_HEIGHT or self.y < 0:
-            self.speed_y *= -1
+        if not self.stopped:
+            if self.x + self.radius >= SCREEN_WIDTH or self.x - self.radius < 0:
+                self.speed_x *= -1
+            if self.y + self.radius >= SCREEN_HEIGHT or self.y - self.radius < 0:
+                self.speed_y *= -1
 
-        self.x += self.speed_x
-        self.y += self.speed_y
+            self.speed_y += self.gravity
+
+            self.x += self.speed_x
+            self.y += self.speed_y
+
+            # todo implement stop conditions
+
 
     def show(self, surface):
         pygame.draw.circle(surface, BLACK, (self.x, self.y), self.radius)
@@ -48,4 +56,3 @@ while True:
     display.fill(WHITE)
     ball.show(surface=display)
     pygame.display.update()
-
