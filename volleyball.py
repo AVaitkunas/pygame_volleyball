@@ -16,9 +16,13 @@ NET_WIDTH = 5
 PLAYER_SIZE = 100
 PLAYER_STRENGTH = 20
 
+BALL_SIZE = 50
 
 WHITE = (225,) * 3
 BLACK = (0,) * 3
+
+pygame.font.init()
+FONT = pygame.font.SysFont('Comic Sans MS', 30)
 
 display = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 display.fill(WHITE)
@@ -26,15 +30,15 @@ pygame.display.set_caption("Volleyball")
 
 
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, diameter=50, *groups):
+    def __init__(self, position=10, *groups):
         super().__init__(*groups)
-        self.speed_x = 5
+        self.speed_x = 0
         self.speed_y = 0
         self.is_stopped = False
         ball_image = pygame.image.load("ball.png")
-        self.image = pygame.transform.scale(ball_image, (diameter,) * 2)
+        self.image = pygame.transform.scale(ball_image, (BALL_SIZE,) * 2)
         self.rect = self.image.get_rect()
-        self.rect = self.rect.move(10, 10)
+        self.rect = self.rect.move(position, 10)
         self.elasticity = 0.8
         self.has_bounced_x = False
         self.has_bounced_y = False
@@ -85,6 +89,9 @@ class Player(pygame.sprite.Sprite):
         self.is_moving_right = False
         self.is_in_jump = False
         self.is_side_left = is_side_left
+        self.points = 0
+        self.consecutive_hits = 0
+        self.lost_match = False
 
     def move_left_started(self):
         self.is_moving_right = False
@@ -123,6 +130,12 @@ class Player(pygame.sprite.Sprite):
 
     def show(self, surface):
         surface.blit(self.image, self.rect)
+        self.show_points(surface=surface)
+
+    def show_points(self, surface):
+        points_text = FONT.render(str(self.points), False, BLACK)
+        position = SCREEN_WIDTH / 4 if self.is_side_left else SCREEN_WIDTH / 4 * 3
+        surface.blit(points_text, (position, 0))
 
 
 class Net(pygame.sprite.Sprite):
@@ -145,8 +158,9 @@ class Wall(pygame.sprite.Sprite):
         pygame.draw.rect(surface, BLACK, self.rect)
 
 
-clock = pygame.time.Clock()
 pygame.init()
+
+clock = pygame.time.Clock()
 volleyball_ball = Ball()
 player1 = Player(start_position=SCREEN_WIDTH - PLAYER_SIZE, is_side_left=False)
 player2 = Player(start_position=0, is_side_left=True)
@@ -200,12 +214,16 @@ while True:
     volleyball_ball.move()
     player1.make_move()
     player2.make_move()
-
+    # BALL dynamics
     if pygame.sprite.collide_rect(player1, volleyball_ball):
         volleyball_ball.hit(player1.rect, strength=PLAYER_STRENGTH)
+        player1.consecutive_hits += 1
+        player2.consecutive_hits = 0
 
     if pygame.sprite.collide_rect(player2, volleyball_ball):
         volleyball_ball.hit(player2.rect, strength=PLAYER_STRENGTH)
+        player2.consecutive_hits += 1
+        player1.consecutive_hits = 0
 
     if pygame.sprite.collide_rect(net, volleyball_ball):
         volleyball_ball.bounce_x()
@@ -215,6 +233,30 @@ while True:
 
     if pygame.sprite.spritecollide(volleyball_ball, horizontal_walls, False):
         volleyball_ball.bounce_y()
+
+    # check violation of the rules
+    if pygame.sprite.collide_rect(volleyball_ball, bottom_wall):
+        if volleyball_ball.rect.centerx < SCREEN_WIDTH / 2:
+            player2.lost_match = True
+        else:
+            player1.lost_match = True
+    if player1.consecutive_hits > 3:
+        player1.lost_match = True
+    if player2.consecutive_hits > 3:
+        player2.lost_match = True
+
+    if player2.lost_match:
+        player1.points += 1
+    if player1.lost_match:
+        player2.points += 1
+
+    if any([player1.lost_match, player2.lost_match]):
+        position = SCREEN_WIDTH / 4 if player1.lost_match else SCREEN_WIDTH / 4 * 3
+        volleyball_ball = Ball(position=round(position))
+        player1.lost_match = False
+        player2.lost_match = False
+        player1.consecutive_hits = 0
+        player2.consecutive_hits = 0
 
     pygame.display.flip()
     clock.tick(FPS)
