@@ -2,8 +2,10 @@ from enum import Enum, auto
 
 import pygame
 
-from models.game_objects import Player, Ball, Wall, Net
-from settings import WALL_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH, PLAYER_STRENGTH
+from models.static_objects import Wall, Net
+from models.ball import Ball
+from models.player import Player
+from settings import WALL_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH, PLAYER_STRENGTH, PLAYER_1_CONTROLS, PLAYER_2_CONTROLS
 
 
 class States(Enum):
@@ -14,8 +16,9 @@ class States(Enum):
 
 class GameState:
     def __init__(self):
-        self.player1 = Player(is_side_left=False)
-        self.player2 = Player(is_side_left=True)
+
+        self.player1 = Player(is_side_left=False, controls=PLAYER_1_CONTROLS)
+        self.player2 = Player(is_side_left=True, controls=PLAYER_2_CONTROLS)
         self.ball = Ball()
         self.net = Net()
 
@@ -44,30 +47,14 @@ class GameState:
         self.ball.make_move()
 
     def handle_start_move_event(self, event):
-        if event.key == pygame.K_LEFT:
-            self.player1.move_left_started()
-        if event.key == pygame.K_RIGHT:
-            self.player1.move_right_started()
-        if event.key == pygame.K_UP:
-            self.player1.move_jump()
-
-        if event.key == ord('a'):
-            self.player2.move_left_started()
-        if event.key == ord('d'):
-            self.player2.move_right_started()
-        if event.key == ord('w'):
-            self.player2.move_jump()
+        for player in (self.player1, self.player2):
+            if event.key in list(player.controls):
+                player.start_move(event.key)
 
     def handle_end_move_event(self, event):
-        if event.key == pygame.K_LEFT:
-            self.player1.move_left_stopped()
-        if event.key == pygame.K_RIGHT:
-            self.player1.move_right_stopped()
-
-        if event.key == ord('a'):
-            self.player2.move_left_stopped()
-        if event.key == ord('d'):
-            self.player2.move_right_stopped()
+        for player in (self.player1, self.player2):
+            if event.key in list(player.controls):
+                player.end_move(event.key)
 
     def handle_ball_collision(self):
         if pygame.sprite.collide_rect(self.player1, self.ball):

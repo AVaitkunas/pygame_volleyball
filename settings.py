@@ -1,4 +1,16 @@
+from typing import NamedTuple
+
+import pygame
+
+
+class Controls(NamedTuple):
+    left: int
+    right: int
+    jump: int
+
+
 # Screen
+
 SCREEN_WIDTH = 640
 SCREEN_HEIGHT = 480
 WALL_WIDTH = 10
@@ -16,7 +28,8 @@ NET_WIDTH = 5
 # Player
 PLAYER_SIZE = 100
 PLAYER_STRENGTH = 25
-
+PLAYER_1_CONTROLS = Controls(left=pygame.K_LEFT, right=pygame.K_RIGHT, jump=pygame.K_UP)
+PLAYER_2_CONTROLS = Controls(left=ord('a'), right=ord('d'), jump=ord('w'))
 
 # todo issues:
 #  1. Ball/player needs to be bouncy
