@@ -9,7 +9,6 @@ class PlayerView:
 
         player_image = pygame.image.load("views/player.png")
         self.image = pygame.transform.scale(player_image, (PLAYER_SIZE,) * 2)
-        self.rect = self.image.get_rect()
 
     def render_player(self, destination_rect):
         self.surface.blit(self.image, destination_rect)

@@ -2,7 +2,7 @@ from math import sqrt
 
 import pygame
 
-from settings import BALL_SIZE, GRAVITY, AIR_FRICTION
+from settings import BALL_SIZE, GRAVITY, AIR_FRICTION, WALL_WIDTH
 
 
 class Ball(pygame.sprite.Sprite):
@@ -11,10 +11,8 @@ class Ball(pygame.sprite.Sprite):
         self.speed_x = 0
         self.speed_y = 0
         self.is_stopped = False
-        ball_image = pygame.image.load("ball.png")
-        self.image = pygame.transform.scale(ball_image, (BALL_SIZE,) * 2)
-        self.rect = self.image.get_rect()
-        self.rect = self.rect.move(position, 10)
+
+        self.rect = pygame.Rect(position, WALL_WIDTH, BALL_SIZE, BALL_SIZE)
         self.elasticity = 0.9
         self.has_bounced_x = False
         self.has_bounced_y = False
@@ -47,6 +45,3 @@ class Ball(pygame.sprite.Sprite):
     def bounce_y(self):
         self.speed_y *= -1
         self.has_bounced_y = True
-
-    def show(self, surface):
-        surface.blit(self.image, self.rect)

@@ -5,6 +5,8 @@ import pygame
 from event_manager import Listener, EventManager, InitializeEvent, QuitEvent, TickEvent
 from game_engine import GameEngine, States
 from settings import SCREEN_WIDTH
+from views.ball_view import BallView
+from views.net_view import NetView
 from views.player_view import PlayerView
 
 
@@ -39,6 +41,8 @@ class GraphicalView(Listener):
         self.small_font = None  # small font
 
         self.player_view = None
+        self.ball_view = None
+        self.net_view = None
 
     def notify(self, event):
         """Receive events posted to the message queue"""
@@ -56,6 +60,7 @@ class GraphicalView(Listener):
 
             current_state = self.model.state.peek()
             if current_state == States.STATE_MENU:
+
                 self.render_menu()
             if current_state == States.STATE_PLAY:
                 self.render_play()
@@ -97,8 +102,12 @@ class GraphicalView(Listener):
             )
         )
 
-        self.model.game_state.ball.show(surface=self.screen)
-        self.model.game_state.net.show(surface=self.screen)
+        self.ball_view.render(
+            destination_rect=self.model.game_state.ball.rect
+        )
+        self.net_view.render(
+            destination_rect=self.model.game_state.net.rect
+        )
 
     def initialize(self):
         """Set up the pygame graphical display and loads graphical resources"""
@@ -110,4 +119,8 @@ class GraphicalView(Listener):
         self.small_font = pygame.font.SysFont('Comic Sans MS', 30)
         self.initialized = True
 
+        # todo these guys have to leave this place and go to initialization of game
         self.player_view = PlayerView(surface=self.screen)
+        self.ball_view = BallView(surface=self.screen)
+        self.net_view = NetView(surface=self.screen)
+
