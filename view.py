@@ -4,6 +4,8 @@ import pygame
 
 from event_manager import Listener, EventManager, InitializeEvent, QuitEvent, TickEvent
 from game_engine import GameEngine, States
+from settings import SCREEN_WIDTH
+from views.player_view import PlayerView
 
 
 class GraphicalView(Listener):
@@ -35,6 +37,8 @@ class GraphicalView(Listener):
         self.screen = None  # the screen surface
         self.clock: pygame.time.Clock = None  # keeps the fps constant
         self.small_font = None  # small font
+
+        self.player_view = None
 
     def notify(self, event):
         """Receive events posted to the message queue"""
@@ -70,10 +74,29 @@ class GraphicalView(Listener):
     def render_play(self):
         """Render the game play."""
         self.screen.fill(pygame.Color("white"))
-        text = self.small_font.render("You are playing the game. F1 for help.", True, pygame.Color("green"))
-        self.screen.blit(text, (0, 0))
-        self.model.game_state.player1.show(surface=self.screen, font=self.small_font)
-        self.model.game_state.player2.show(surface=self.screen, font=self.small_font)
+
+        self.player_view.render_player(
+            destination_rect=self.model.game_state.player1.rect
+        )
+        self.player_view.render_player(
+            destination_rect=self.model.game_state.player2.rect
+        )
+
+        self.player_view.render_player_points(
+            points=self.model.game_state.player1.points,
+            font=self.small_font,
+            destination_rect=(
+                SCREEN_WIDTH / 4 if self.model.game_state.player1.is_side_left else SCREEN_WIDTH / 4 * 3, 0
+            )
+        )
+        self.player_view.render_player_points(
+            points=self.model.game_state.player2.points,
+            font=self.small_font,
+            destination_rect=(
+                SCREEN_WIDTH / 4 if self.model.game_state.player2.is_side_left else SCREEN_WIDTH / 4 * 3, 0
+            )
+        )
+
         self.model.game_state.ball.show(surface=self.screen)
         self.model.game_state.net.show(surface=self.screen)
 
@@ -86,3 +109,5 @@ class GraphicalView(Listener):
         self.clock = pygame.time.Clock()
         self.small_font = pygame.font.SysFont('Comic Sans MS', 30)
         self.initialized = True
+
+        self.player_view = PlayerView(surface=self.screen)

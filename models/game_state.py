@@ -32,7 +32,7 @@ class GameState:
 
     def clean_up(self):
         for player in (self.player1, self.player2):
-            player.lost_match = False
+            player.won_match = False
             player.consecutive_hits = 0
 
     def setup_pre_game(self, is_left_side_starts):
@@ -78,16 +78,19 @@ class GameState:
         for player in (self.player1, self.player2):
             if pygame.sprite.collide_rect(self.ball, self.floor):
                 coord_range = (
-                    range(int(SCREEN_WIDTH / 2)) if player.is_side_left else
-                    range(int(SCREEN_WIDTH / 2), SCREEN_WIDTH)
+                    range(int(SCREEN_WIDTH / 2), SCREEN_WIDTH) if player.is_side_left else
+                    range(int(SCREEN_WIDTH / 2))
                 )
                 if self.ball.rect.centerx in coord_range:
-                    player.lost_match = True
-            if player.consecutive_hits > 3:
-                player.lost_match = True
+                    player.won_match = True
+
+        if self.player1.consecutive_hits > 3:
+            self.player2.won_match = True
+        if self.player2.consecutive_hits > 3:
+            self.player1.won_match = True
 
     def calculate_points_and_start_new_match(self):
         for player in (self.player1, self.player2):
-            if player.lost_match:
+            if player.won_match:
                 player.points += 1
-                self.setup_pre_game(not player.is_side_left)
+                self.setup_pre_game(player.is_side_left)

@@ -26,6 +26,8 @@ NET_HEIGHT = 300
 NET_WIDTH = 5
 
 # Player
+PLAYER_SPEED_X = 10
+PLAYER_SPEED_Y = -20
 PLAYER_SIZE = 100
 PLAYER_STRENGTH = 25
 PLAYER_1_CONTROLS = Controls(left=pygame.K_LEFT, right=pygame.K_RIGHT, jump=pygame.K_UP)
