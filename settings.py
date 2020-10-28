@@ -41,3 +41,8 @@ PLAYER_2_CONTROLS = Controls(left=ord('a'), right=ord('d'), jump=ord('w'))
 #  3. Ball sometimes stucks into the net if lands directly from above
 #  4. Ball makes multiple touches with player if jumps into the ball
 #  5. tweak parameters to move ball with different speed if player is static and moving
+#  6. add a popup when one player wins (reaches 21 or sth).
+#  7. add 3s pause after game point
+#  8. menu!!!
+
+

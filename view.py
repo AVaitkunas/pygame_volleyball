@@ -4,8 +4,8 @@ import pygame
 
 from event_manager import Listener, EventManager, InitializeEvent, QuitEvent, TickEvent
 from game_engine import GameEngine, States
-from settings import SCREEN_WIDTH
 from views.ball_view import BallView
+from views.menu import Menu
 from views.net_view import NetView
 from views.player_view import PlayerView
 
@@ -29,6 +29,7 @@ class GraphicalView(Listener):
         @param fps: Frames per second
         """
         super().__init__(event_manager)  # Register listener to event manager
+        self.event_manager = event_manager
         self.model = model_object
         self.window_size = win_size
         self.window_title = win_title
@@ -40,6 +41,7 @@ class GraphicalView(Listener):
         self.clock: pygame.time.Clock = None  # keeps the fps constant
         self.small_font = None  # small font
 
+        self.menu = None
         self.player_view = None
         self.ball_view = None
         self.net_view = None
@@ -70,10 +72,8 @@ class GraphicalView(Listener):
     def render_menu(self):
         """Render the game menu"""
         self.screen.fill(pygame.Color("white"))
-        text = self.small_font.render(
-            "You are in the Menu. Space to play. Esc exits.", True, (0, 255, 0)
-        )
-        self.screen.blit(text, (0, 0))
+        self.menu.show_menu()
+        print('got there')
 
     def render_play(self):
         """Render the game play."""
@@ -107,3 +107,4 @@ class GraphicalView(Listener):
         self.player_view = PlayerView(surface=self.screen, font=self.small_font)
         self.ball_view = BallView(surface=self.screen)
         self.net_view = NetView(surface=self.screen)
+        self.menu = Menu(screen=self.screen)
