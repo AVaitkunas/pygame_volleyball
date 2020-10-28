@@ -2,10 +2,11 @@ from enum import Enum, auto
 
 import pygame
 
-from models.static_objects import Wall, Net
+from models.static_objects import Wall
 from models.ball import Ball
 from models.player import Player
-from settings import WALL_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH, PLAYER_STRENGTH, PLAYER_1_CONTROLS, PLAYER_2_CONTROLS
+from settings import WALL_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH, PLAYER_STRENGTH, PLAYER_1_CONTROLS, PLAYER_2_CONTROLS, \
+    NET_HEIGHT, NET_WIDTH
 
 
 class States(Enum):
@@ -20,12 +21,19 @@ class GameState:
         self.player1 = Player(is_side_left=False, controls=PLAYER_1_CONTROLS)
         self.player2 = Player(is_side_left=True, controls=PLAYER_2_CONTROLS)
         self.ball = Ball()
-        self.net = Net()
 
         self.vertical_walls = pygame.sprite.Group()
         self.horizontal_walls = pygame.sprite.Group()
-        self.vertical_walls.add(self.net)
-        self.floor = Wall(self.horizontal_walls, rect=(0, SCREEN_HEIGHT - WALL_WIDTH, SCREEN_WIDTH, WALL_WIDTH))
+
+        self.net = Wall(
+            self.vertical_walls,
+            rect=(int(SCREEN_WIDTH / 2) - NET_WIDTH, SCREEN_HEIGHT - NET_HEIGHT, NET_WIDTH * 2, NET_HEIGHT)
+        )
+        self.floor = Wall(
+            self.horizontal_walls,
+            rect=(0, SCREEN_HEIGHT - WALL_WIDTH, SCREEN_WIDTH, WALL_WIDTH)
+        )
+
         Wall(self.vertical_walls, rect=(0, 0, WALL_WIDTH, SCREEN_HEIGHT))
         Wall(self.vertical_walls, rect=(SCREEN_WIDTH - WALL_WIDTH, 0, WALL_WIDTH, SCREEN_HEIGHT))
         Wall(self.horizontal_walls, rect=(0, 0, SCREEN_WIDTH, WALL_WIDTH))
@@ -57,16 +65,16 @@ class GameState:
                 player.end_move(event.key)
 
     def handle_ball_collision(self):
-        if pygame.sprite.collide_rect(self.player1, self.ball):
+        if self.player1.rect.colliderect(self.ball.rect):
             self.ball.hit(self.player1.rect, strength=PLAYER_STRENGTH)
 
             self.player1.consecutive_hits += 1
             self.player2.consecutive_hits = 0
 
-        if pygame.sprite.collide_rect(self.player2, self.ball):
+        if self.player2.rect.colliderect(self.ball.rect):
             self.ball.hit(self.player2.rect, strength=PLAYER_STRENGTH)
-            self.player2.consecutive_hits += 1
             self.player1.consecutive_hits = 0
+            self.player2.consecutive_hits += 1
 
         if pygame.sprite.spritecollide(self.ball, self.vertical_walls, False):
             self.ball.bounce_x()

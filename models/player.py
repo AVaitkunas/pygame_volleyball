@@ -3,7 +3,7 @@ from settings import (PLAYER_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT, GRAVITY,
                       Controls, WALL_WIDTH, PLAYER_SPEED_X, PLAYER_SPEED_Y)
 
 
-class Player(pygame.sprite.Sprite):
+class Player:
     def __init__(self, controls: Controls, is_side_left: bool = True):
         super().__init__()
 
