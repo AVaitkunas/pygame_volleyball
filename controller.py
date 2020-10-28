@@ -17,6 +17,7 @@ class KeyboardController(Listener):
         self.model = model_object
 
         self.key_events_map = {
+            # todo are menu key presses makes sense anymore?
             States.STATE_MENU: {"press": self.key_down_events_menu, "release": None},
             States.STATE_PLAY: {"press": self.key_down_events_play, "release": self.key_up_events_play},
         }
@@ -63,7 +64,7 @@ class KeyboardController(Listener):
     def key_down_events_menu(self, event):
         """Handles all key event in game state MENU."""
 
-        # escape pops the menu
+        # escape pops the menu todo not working anymore
         if event.key == pygame.K_ESCAPE:
             self.event_manager.post(StateChangeEvent(None))
 

@@ -1,5 +1,19 @@
+from enum import Enum, auto
+
 import pygame_menu
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT
+
+
+class MenuActions(Enum):
+    PLAY = auto()
+    SETTINGS = auto()
+    QUIT = auto()
+
+
+class GameModes(Enum):
+    MULTI_PLAYER_LOCAL = auto()
+    MULTI_PLAYER_ONLINE = auto()
+    SINGLE_PLAYER = auto()
 
 
 class Menu:
@@ -11,7 +25,7 @@ class Menu:
             theme=pygame_menu.themes.THEME_DARK
         )
         self.screen = screen
-        self.game_mode = None
+        self.game_mode = GameModes.MULTI_PLAYER_LOCAL
 
         # todo does not do anything yet. think how to apply for multiplayer
         self.game_menu.add_text_input(
@@ -21,11 +35,12 @@ class Menu:
         )
         self.game_menu.add_selector(
             "Select Game Mode: ",
-            [(" Multi-player 1 PC ", 1), ("Multi-player Online", 2), ("   Single-player   ", 3)],
+            [(" Multi-player 1 PC ", GameModes.MULTI_PLAYER_LOCAL),
+             ("Multi-player Online", GameModes.MULTI_PLAYER_ONLINE),
+             ("   Single-player   ", GameModes.SINGLE_PLAYER)],
             onchange=self.set_game_mode,
-            default=0
         )
-
+        self.action = None
         self.game_menu.add_button('Play', self.start_game)
         self.game_menu.add_button('Quit', self.quit)
 
@@ -35,14 +50,17 @@ class Menu:
     def set_player_name(self, name):
         print(f"set player name to {name}")
 
-    def set_game_mode(self, value, game_mode):
-        print(f"{value} and {game_mode}")
+    def set_game_mode(self, _, game_mode):
+        self.game_mode = game_mode
 
     def start_game(self):
-        print("start game")
+        self.action = MenuActions.PLAY
+        self.game_menu.disable()
 
     def settings(self):
-        print("settings page")
+        self.action = MenuActions.SETTINGS
+        self.game_menu.disable()
 
     def quit(self):
-        print("quit the game")
+        self.action = MenuActions.QUIT
+        self.game_menu.disable()
