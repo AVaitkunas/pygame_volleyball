@@ -43,6 +43,6 @@ PLAYER_2_CONTROLS = Controls(left=ord('a'), right=ord('d'), jump=ord('w'))
 #  5. tweak parameters to move ball with different speed if player is static and moving
 #  6. add a popup when one player wins (reaches 21 or sth).
 #  7. add 3s pause after game point
-#  8. menu!!!
+#  8. make MENU page to start play the game.
 
 
