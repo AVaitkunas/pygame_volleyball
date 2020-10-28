@@ -1,64 +1,74 @@
 import pygame
-from settings import (PLAYER_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT, GRAVITY,
-                      Controls, WALL_WIDTH, PLAYER_SPEED_X, PLAYER_SPEED_Y)
+from settings import (PLAYER_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT, Controls,
+                      WALL_WIDTH, PLAYER_SPEED_X, PLAYER_SPEED_Y, PLAYER_GRAVITY)
+
+
+class Movement:
+    def __init__(self):
+        self.left = False
+        self.right = False
+        self.in_jump = False
+
+    def move_left(self):
+        self.left = True
+        self.right = False
+
+    def move_right(self):
+        self.left = False
+        self.right = True
+
+    def jump(self):
+        self.in_jump = True
+
+    def stop_vertical(self):
+        self.left = False
+        self.right = False
 
 
 class Player:
     def __init__(self, controls: Controls, is_side_left: bool = True):
         super().__init__()
+        self.controls = controls
+        self.movement = Movement()
 
         start_position = 0 if is_side_left else SCREEN_WIDTH - PLAYER_SIZE
         self.rect = pygame.Rect(start_position, SCREEN_HEIGHT - PLAYER_SIZE - WALL_WIDTH, PLAYER_SIZE, PLAYER_SIZE)
 
+        self.is_side_left = is_side_left
+        self.boundary_x = 0 if is_side_left else SCREEN_WIDTH / 2
+
         self.speed_x = PLAYER_SPEED_X
         self.speed_y = PLAYER_SPEED_Y
-        self.is_moving_left = False
-        self.is_moving_right = False
-        self.is_in_jump = False
-        self.is_side_left = is_side_left
+
         self.points = 0
         self.consecutive_hits = 0
         self.won_match = False
-        self.controls = controls
 
     def start_move(self, key):
         if key == self.controls.left:
-            self.is_moving_right = False
-            self.is_moving_left = True
+            self.movement.move_left()
         elif key == self.controls.right:
-            self.is_moving_right = True
-            self.is_moving_left = False
+            self.movement.move_right()
         elif key == self.controls.jump:
-            self.is_in_jump = True
+            self.movement.jump()
 
     def end_move(self, key):
-        if key == self.controls.left:
-            self.is_moving_left = False
-        elif key == self.controls.right:
-            self.is_moving_right = False
-
-    def move_left_stopped(self):
-        self.is_moving_left = False
-
-    def move_right_stopped(self):
-        self.is_moving_right = False
+        if key in (self.controls.left, self.controls.right):
+            self.movement.stop_vertical()
 
     def _jump(self):
-        self.speed_y += GRAVITY * 2
+        self.speed_y += PLAYER_GRAVITY
         if self.rect.bottom + self.speed_y >= SCREEN_HEIGHT:
             self.rect = self.rect.move(0, SCREEN_HEIGHT - self.rect.bottom)
-            self.is_in_jump = False
+            self.movement.in_jump = False
             self.speed_y = PLAYER_SPEED_Y
         self.rect = self.rect.move(0, self.speed_y)
 
     def make_move(self):
-        end_point = SCREEN_WIDTH / 2 if self.is_side_left else SCREEN_WIDTH
-        start_point = 0 if self.is_side_left else SCREEN_WIDTH / 2
-        if self.is_moving_left and self.rect.left > start_point:
+
+        if self.movement.left and self.rect.left > self.boundary_x:
             self.rect = self.rect.move(-self.speed_x, 0)
-        if self.is_moving_right and self.rect.right < end_point:
+        if self.movement.right and self.rect.right < self.boundary_x + SCREEN_WIDTH / 2:
             self.rect = self.rect.move(self.speed_x, 0)
-        if self.is_in_jump:
+        if self.movement.in_jump:
             self._jump()
-
-

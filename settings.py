@@ -17,7 +17,7 @@ WALL_WIDTH = 10
 FPS = 30
 
 # Ball
-GRAVITY = 0.5
+BALL_GRAVITY = 0.5
 AIR_FRICTION = 0.99
 BALL_SIZE = 60
 
@@ -29,7 +29,9 @@ NET_WIDTH = 5
 PLAYER_SPEED_X = 10
 PLAYER_SPEED_Y = -20
 PLAYER_SIZE = 100
-PLAYER_STRENGTH = 25
+PLAYER_STRENGTH = 20
+PLAYER_GRAVITY = 0.8
+
 PLAYER_1_CONTROLS = Controls(left=pygame.K_LEFT, right=pygame.K_RIGHT, jump=pygame.K_UP)
 PLAYER_2_CONTROLS = Controls(left=ord('a'), right=ord('d'), jump=ord('w'))
 

@@ -60,7 +60,6 @@ class GraphicalView(Listener):
 
             current_state = self.model.state.peek()
             if current_state == States.STATE_MENU:
-
                 self.render_menu()
             if current_state == States.STATE_PLAY:
                 self.render_play()
@@ -80,27 +79,12 @@ class GraphicalView(Listener):
         """Render the game play."""
         self.screen.fill(pygame.Color("white"))
 
-        self.player_view.render_player(
-            destination_rect=self.model.game_state.player1.rect
-        )
-        self.player_view.render_player(
-            destination_rect=self.model.game_state.player2.rect
-        )
-
-        self.player_view.render_player_points(
-            points=self.model.game_state.player1.points,
-            font=self.small_font,
-            destination_rect=(
-                SCREEN_WIDTH / 4 if self.model.game_state.player1.is_side_left else SCREEN_WIDTH / 4 * 3, 0
+        for player in (self.model.game_state.player1, self.model.game_state.player2):
+            self.player_view.render_player(
+                destination_rect=player.rect,
+                is_side_left=player.is_side_left,
+                points=player.points
             )
-        )
-        self.player_view.render_player_points(
-            points=self.model.game_state.player2.points,
-            font=self.small_font,
-            destination_rect=(
-                SCREEN_WIDTH / 4 if self.model.game_state.player2.is_side_left else SCREEN_WIDTH / 4 * 3, 0
-            )
-        )
 
         self.ball_view.render(
             destination_rect=self.model.game_state.ball.rect
@@ -120,7 +104,6 @@ class GraphicalView(Listener):
         self.initialized = True
 
         # todo these guys have to leave this place and go to initialization of game
-        self.player_view = PlayerView(surface=self.screen)
+        self.player_view = PlayerView(surface=self.screen, font=self.small_font)
         self.ball_view = BallView(surface=self.screen)
         self.net_view = NetView(surface=self.screen)
-

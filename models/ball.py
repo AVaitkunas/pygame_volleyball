@@ -2,7 +2,7 @@ from math import sqrt
 
 import pygame
 
-from settings import BALL_SIZE, GRAVITY, AIR_FRICTION, WALL_WIDTH
+from settings import BALL_SIZE, BALL_GRAVITY, AIR_FRICTION, WALL_WIDTH
 
 
 class Ball(pygame.sprite.Sprite):
@@ -20,7 +20,7 @@ class Ball(pygame.sprite.Sprite):
     def make_move(self):
         """Makes ball move. Gravity is taken into account."""
         if not self.is_stopped:
-            self.speed_y += GRAVITY
+            self.speed_y += BALL_GRAVITY
             self.speed_x *= AIR_FRICTION
 
             self.rect = self.rect.move(self.speed_x, self.speed_y)
