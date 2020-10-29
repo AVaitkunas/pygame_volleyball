@@ -66,13 +66,23 @@ class GameState:
 
     def handle_ball_collision(self):
         if self.player1.rect.colliderect(self.ball.rect):
-            self.ball.hit(self.player1.rect, strength=PLAYER_STRENGTH)
+            self.ball.hit(
+                object_rect=self.player1.rect,
+                strength=PLAYER_STRENGTH,
+                speed_in_y=self.player1.speed_y,
+                is_in_jump=self.player1.movement.in_jump
+            )
 
             self.player1.consecutive_hits += 1
             self.player2.consecutive_hits = 0
 
         if self.player2.rect.colliderect(self.ball.rect):
-            self.ball.hit(self.player2.rect, strength=PLAYER_STRENGTH)
+            self.ball.hit(
+                object_rect=self.player2.rect,
+                strength=PLAYER_STRENGTH,
+                speed_in_y=self.player2.speed_y,
+                is_in_jump=self.player2.movement.in_jump
+            )
             self.player1.consecutive_hits = 0
             self.player2.consecutive_hits += 1
 

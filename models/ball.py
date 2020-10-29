@@ -2,7 +2,7 @@ from math import sqrt
 
 import pygame
 
-from settings import BALL_SIZE, BALL_GRAVITY, AIR_FRICTION, WALL_WIDTH
+from settings import BALL_SIZE, BALL_GRAVITY, AIR_FRICTION, WALL_WIDTH, PLAYER_SPEED_Y
 
 
 class Ball(pygame.sprite.Sprite):
@@ -29,12 +29,23 @@ class Ball(pygame.sprite.Sprite):
             self.speed_y *= self.elasticity
             self.has_bounced_y = False
 
-    def hit(self, object_rect, strength=15, offset_x=0, offset_y=0):
+    def hit(self, object_rect, strength, speed_in_y=0, is_in_jump=0):
         delta_x = self.rect.centerx - object_rect.centerx
         delta_y = self.rect.centery - object_rect.centery
         normalization_factor = strength / sqrt(delta_x ** 2 + delta_y ** 2)
-        self.speed_x = normalization_factor * delta_x + offset_x
-        self.speed_y = normalization_factor * delta_y + offset_y
+        if is_in_jump:
+
+            if speed_in_y < 0:
+                normalization_factor *= 1 + (speed_in_y / PLAYER_SPEED_Y) * 0.5
+            else:
+                normalization_factor *= 1 - (speed_in_y / PLAYER_SPEED_Y) * 0.5
+
+            clip = object_rect.clip(self.rect)
+            if abs(clip.h) + abs(speed_in_y) > abs(self.speed_y):
+                self.rect.y -= abs(clip.h) + abs(speed_in_y) - abs(self.speed_y)
+
+        self.speed_x = normalization_factor * delta_x
+        self.speed_y = normalization_factor * delta_y
 
     def bounce_x(self):
         self.speed_x *= -1
