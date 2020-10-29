@@ -1,7 +1,23 @@
+import json
+
 from event_manager import TickEvent, InitializeEvent, StateChangeEvent, QuitEvent, Listener, KeyboardPressEvent, \
-    KeyboardReleaseEvent
+    KeyboardReleaseEvent, Event
 from models.game_state import GameState
 from models.state_machine import StateMachine, States
+from network import Network
+from views.menu import GameModes
+
+
+def encode_event(event: Event):
+    data = {"event": str(event), "data": None}
+    if isinstance(event, (KeyboardReleaseEvent, KeyboardPressEvent)):
+        data["data"] = event.key
+    return json.dumps(data).encode()
+
+
+def decode_event(event_str: str):
+    event_data = json.loads(event_str)
+    return event_data["event"], event_data["data"]
 
 
 class GameEngine(Listener):
@@ -20,6 +36,7 @@ class GameEngine(Listener):
         self.state = StateMachine()
         self.game_state = GameState()
         self.game_state.setup_pre_game(is_left_side_starts=True)
+        self.connection = None
 
     def notify(self, event):
         """Called by an event in the message queue."""
@@ -35,12 +52,16 @@ class GameEngine(Listener):
             # false if no more states are left
             if not self.state.pop():
                 self.event_manager.post(QuitEvent())
-        if isinstance(event, KeyboardPressEvent):
-            # connection.send(event)
-            self.game_state.handle_start_move_event(event=event)
-        if isinstance(event, KeyboardReleaseEvent):
-            self.game_state.handle_end_move_event(event=event)
-        if isinstance(event, TickEvent):
+
+        if self.game_mode == GameModes.MULTI_PLAYER_ONLINE:
+            encoded_event = encode_event(event)
+            self.connection.send(encoded_event)
+
+        elif isinstance(event, KeyboardPressEvent) and self.game_mode == GameModes.MULTI_PLAYER_LOCAL:
+            self.game_state.handle_start_move_event(key=event.key)
+        elif isinstance(event, KeyboardReleaseEvent) and self.game_mode == GameModes.MULTI_PLAYER_LOCAL:
+            self.game_state.handle_end_move_event(key=event.key)
+        elif isinstance(event, TickEvent) and self.game_mode == GameModes.MULTI_PLAYER_LOCAL:
             self.game_state.handle_game_tick_event()
 
     def run(self):
@@ -49,6 +70,12 @@ class GameEngine(Listener):
         The loop ends when this object hears a QuitEvent in notify()
         """
         self.running = True
+
+        # todo we initialize connection with server no matter what game mode we have chose
+        #  HOW TO KNOW THAT OPPONENT IS READY TO PLAY?
+        self.connection = Network()
+
+
         self.event_manager.post(InitializeEvent())
         # we push our first state to the stack
         # our menu is always the first game state
@@ -58,10 +85,19 @@ class GameEngine(Listener):
             new_tick = TickEvent()
             self.event_manager.post(new_tick)
 
-            if self.state.peek() == States.STATE_PLAY:
+            if self.state.peek() == States.STATE_PLAY and self.game_mode == GameModes.MULTI_PLAYER_LOCAL:
                 self.game_state.check_game_rules_violation()
                 self.game_state.calculate_points_and_start_new_match()
 
-            # if opponent_connected:
-            #     new_data= connection.read()
-            #     self.game_state.player1.rect = new_data.player1.rect
+            elif self.state.peek() == States.STATE_PLAY and self.game_mode == GameModes.MULTI_PLAYER_ONLINE:
+                game_info = self.connection.game_info
+
+                self.game_state.player1.rect.x = game_info["player1_x"]
+                self.game_state.player1.rect.y = game_info["player1_y"]
+                self.game_state.player1.points =  game_info["player1_points"]
+                self.game_state.player2.rect.x = game_info["player2_x"]
+                self.game_state.player2.rect.y = game_info["player2_y"]
+                self.game_state.player2.points = game_info["player2_points"]
+                self.game_state.ball.rect.x = game_info["ball_x"]
+                self.game_state.ball.rect.y = game_info["ball_y"]
+

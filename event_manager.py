@@ -59,7 +59,7 @@ class KeyboardPressEvent(Event):
         self.key = key
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(unicode_char='{self.key}')"
+        return f"{self.__class__.__name__}(key='{self.key}')"
 
 
 class KeyboardReleaseEvent(Event):
@@ -69,7 +69,7 @@ class KeyboardReleaseEvent(Event):
         self.key = key
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(unicode_char='{self.key}')"
+        return f"{self.__class__.__name__}(key='{self.key}')"
 
 
 class InitializeEvent(Event):

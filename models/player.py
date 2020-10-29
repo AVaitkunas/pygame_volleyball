@@ -65,7 +65,6 @@ class Player:
         self.rect = self.rect.move(0, self.speed_y)
 
     def make_move(self):
-
         if self.movement.left and self.rect.left > self.boundary_x:
             self.rect = self.rect.move(-self.speed_x, 0)
         if self.movement.right and self.rect.right < self.boundary_x + SCREEN_WIDTH / 2:

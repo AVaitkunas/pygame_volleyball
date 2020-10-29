@@ -10,7 +10,6 @@ class Ball(pygame.sprite.Sprite):
         super().__init__(*groups)
         self.speed_x = 0
         self.speed_y = 0
-        self.is_stopped = False
 
         self.rect = pygame.Rect(position, WALL_WIDTH, BALL_SIZE, BALL_SIZE)
         self.elasticity = 0.9
@@ -19,17 +18,16 @@ class Ball(pygame.sprite.Sprite):
 
     def make_move(self):
         """Makes ball move. Gravity is taken into account."""
-        if not self.is_stopped:
-            self.speed_y += BALL_GRAVITY
-            self.speed_x *= AIR_FRICTION
+        self.speed_y += BALL_GRAVITY
+        self.speed_x *= AIR_FRICTION
 
-            self.rect = self.rect.move(self.speed_x, self.speed_y)
-            if self.has_bounced_x:
-                self.speed_x *= self.elasticity
-                self.has_bounced_x = False
-            if self.has_bounced_y:
-                self.speed_y *= self.elasticity
-                self.has_bounced_y = False
+        self.rect = self.rect.move(self.speed_x, self.speed_y)
+        if self.has_bounced_x:
+            self.speed_x *= self.elasticity
+            self.has_bounced_x = False
+        if self.has_bounced_y:
+            self.speed_y *= self.elasticity
+            self.has_bounced_y = False
 
     def hit(self, object_rect, strength=15, offset_x=0, offset_y=0):
         delta_x = self.rect.centerx - object_rect.centerx

@@ -76,16 +76,13 @@ class GraphicalView(Listener):
         self.screen.fill(pygame.Color("white"))
         self.menu.game_menu.enable()
         self.menu.show_menu()
+
         if self.menu.action == MenuActions.QUIT:
             self.event_manager.post(QuitEvent())
             return True
         elif self.menu.action == MenuActions.PLAY:
-            if self.menu.game_mode == GameModes.MULTI_PLAYER_LOCAL:
-                self.event_manager.post(StateChangeEvent(States.STATE_PLAY))
-            else:
-                print(f"Game mode chosen: {self.menu.game_mode}. However not implemented yet. Quitting...")
-                self.event_manager.post(QuitEvent())
-                return True
+            self.model.game_mode = self.menu.game_mode
+            self.event_manager.post(StateChangeEvent(States.STATE_PLAY))
 
         return None
 
