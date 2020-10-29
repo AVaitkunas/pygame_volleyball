@@ -62,10 +62,11 @@ class GraphicalView(Listener):
 
             current_state = self.model.state.peek()
             if current_state == States.STATE_MENU:
-                self.render_menu()
-            if current_state == States.STATE_PLAY:
+                if self.render_menu():
+                    return
+            elif current_state == States.STATE_PLAY:
                 self.render_play()
-            # todo fails if menu quit is chosen
+
             pygame.display.flip()
             # limit the redraw speed to 30 frames per second
             self.clock.tick(self.fps)
@@ -75,19 +76,18 @@ class GraphicalView(Listener):
         self.screen.fill(pygame.Color("white"))
         self.menu.game_menu.enable()
         self.menu.show_menu()
-        # todo find a place where to put this. So far is not working, if posting QuitEvent or pygame.quit()
         if self.menu.action == MenuActions.QUIT:
-            # self.event_manager.post(QuitEvent)
-            self.initialized = False
-            pygame.quit()
-        if self.menu.action == MenuActions.PLAY:
+            self.event_manager.post(QuitEvent())
+            return True
+        elif self.menu.action == MenuActions.PLAY:
             if self.menu.game_mode == GameModes.MULTI_PLAYER_LOCAL:
                 self.event_manager.post(StateChangeEvent(States.STATE_PLAY))
             else:
                 print(f"Game mode chosen: {self.menu.game_mode}. However not implemented yet. Quitting...")
-                # self.event_manager.post(QuitEvent)
-                self.initialized = False
-                pygame.quit()
+                self.event_manager.post(QuitEvent())
+                return True
+
+        return None
 
     def render_play(self):
         """Render the game play."""

@@ -16,6 +16,7 @@ class GameEngine(Listener):
         super().__init__(event_manager)  # Register listener to event manager
         # True while the engine is online. Changed via QuitEvent()
         self.running = False
+        self.game_mode = None
         self.state = StateMachine()
         self.game_state = GameState()
         self.game_state.setup_pre_game(is_left_side_starts=True)
@@ -35,6 +36,7 @@ class GameEngine(Listener):
             if not self.state.pop():
                 self.event_manager.post(QuitEvent())
         if isinstance(event, KeyboardPressEvent):
+            # connection.send(event)
             self.game_state.handle_start_move_event(event=event)
         if isinstance(event, KeyboardReleaseEvent):
             self.game_state.handle_end_move_event(event=event)
@@ -55,5 +57,11 @@ class GameEngine(Listener):
         while self.running:
             new_tick = TickEvent()
             self.event_manager.post(new_tick)
-            self.game_state.check_game_rules_violation()
-            self.game_state.calculate_points_and_start_new_match()
+
+            if self.state.peek() == States.STATE_PLAY:
+                self.game_state.check_game_rules_violation()
+                self.game_state.calculate_points_and_start_new_match()
+
+            # if opponent_connected:
+            #     new_data= connection.read()
+            #     self.game_state.player1.rect = new_data.player1.rect

@@ -45,7 +45,7 @@ class Menu:
         self.game_menu.add_button('Quit', self.quit)
 
     def show_menu(self):
-        self.game_menu.mainloop(surface=self.screen)
+        self.game_menu.mainloop(surface=self.screen, disable_loop=True)
 
     def set_player_name(self, name):
         print(f"set player name to {name}")
