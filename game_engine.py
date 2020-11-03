@@ -71,8 +71,6 @@ class GameEngine(Listener):
         """
         self.running = True
 
-
-
         self.event_manager.post(InitializeEvent())
         # we push our first state to the stack
         # our menu is always the first game state
