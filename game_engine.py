@@ -36,7 +36,7 @@ class GameEngine(Listener):
         self.state = StateMachine()
         self.game_state = GameState()
         self.game_state.setup_pre_game(is_left_side_starts=True)
-        self.connection = None
+        self.connection = Network(event_manager=self.event_manager, game_engine=self)
 
     def notify(self, event):
         """Called by an event in the message queue."""
@@ -71,9 +71,6 @@ class GameEngine(Listener):
         """
         self.running = True
 
-        # todo we initialize connection with server no matter what game mode we have chose
-        #  HOW TO KNOW THAT OPPONENT IS READY TO PLAY?
-        self.connection = Network()
 
 
         self.event_manager.post(InitializeEvent())
@@ -89,15 +86,14 @@ class GameEngine(Listener):
                 self.game_state.check_game_rules_violation()
                 self.game_state.calculate_points_and_start_new_match()
 
-            elif self.state.peek() == States.STATE_PLAY and self.game_mode == GameModes.MULTI_PLAYER_ONLINE:
+            elif self.state.peek() == States.STATE_PLAY and self.game_mode == GameModes.MULTI_PLAYER_ONLINE and self.connection.game_info:
                 game_info = self.connection.game_info
 
                 self.game_state.player1.rect.x = game_info["player1_x"]
                 self.game_state.player1.rect.y = game_info["player1_y"]
-                self.game_state.player1.points =  game_info["player1_points"]
+                self.game_state.player1.points = game_info["player1_points"]
                 self.game_state.player2.rect.x = game_info["player2_x"]
                 self.game_state.player2.rect.y = game_info["player2_y"]
                 self.game_state.player2.points = game_info["player2_points"]
                 self.game_state.ball.rect.x = game_info["ball_x"]
                 self.game_state.ball.rect.y = game_info["ball_y"]
-

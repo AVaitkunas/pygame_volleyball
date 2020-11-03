@@ -54,15 +54,29 @@ class GameState:
         self.player2.make_move()
         self.ball.make_move()
 
+    def handle_start_move_event_player_1(self, key):
+        if key in list(self.player1.controls):
+            self.player1.start_move(key=key)
+
+    def handle_start_move_event_player_2(self, key):
+        if key in list(self.player2.controls):
+            self.player2.start_move(key=key)
+
+    def handle_end_move_event_player_1(self, key):
+        if key in list(self.player1.controls):
+            self.player1.end_move(key=key)
+
+    def handle_end_move_event_player_2(self, key):
+        if key in list(self.player2.controls):
+            self.player2.end_move(key=key)
+
     def handle_start_move_event(self, key):
-        for player in (self.player1, self.player2):
-            if key in list(player.controls):
-                player.start_move(key)
+        self.handle_start_move_event_player_1(key=key)
+        self.handle_start_move_event_player_2(key=key)
 
     def handle_end_move_event(self, key):
-        for player in (self.player1, self.player2):
-            if key in list(player.controls):
-                player.end_move(key)
+        self.handle_end_move_event_player_1(key=key)
+        self.handle_end_move_event_player_2(key=key)
 
     def handle_ball_collision(self):
         if self.player1.rect.colliderect(self.ball.rect):

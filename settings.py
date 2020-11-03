@@ -39,8 +39,6 @@ PLAYER_2_CONTROLS = Controls(left=ord('a'), right=ord('d'), jump=ord('w'))
 #  1. Ball/player needs to be bouncy
 #  2. Change colors of the players
 #  3. Ball sometimes stucks into the net if lands directly from above
-#  6. add a popup when one player wins (reaches 21 or sth).
-#  7. add 3s pause after game point
-
-
-
+#  4. add a popup when one player wins (reaches 21 or sth).
+#  5. add 3s pause after game point
+#  6. implement pause
