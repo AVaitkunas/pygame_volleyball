@@ -92,6 +92,7 @@ class ClientThread(Thread):
         while True:
             try:
                 data_received = self.socket.recv(2048) # todo add framing <start_indicator><data_length><payload>
+                print(data_received)
             except Exception as e:
                 print(str(e))
                 break
@@ -102,12 +103,14 @@ class ClientThread(Thread):
             event, value = decode_event(data_received.decode())
             with self.lock:
                 if KeyboardPressEvent.__name__ in event:
+                    print(f"{self.client_info.unique_id}: {value}")
                     self.game_state_thread.handle_start_move(player_id=self.client_info.unique_id, key_value=value)
+
                 elif KeyboardReleaseEvent.__name__ in event:
                     self.game_state_thread.handle_end_move(player_id=self.client_info.unique_id, key_value=value)
-                elif TickEvent.__name__ in event:
-                    game_state_info = self.game_state_thread.get_game_state_info_message()
-                    self.socket.send(game_state_info)
+
+                game_state_info = self.game_state_thread.get_game_state_info_message()
+                self.socket.send(game_state_info)
 
         print("Lost connection")
         self.socket.close()

@@ -54,8 +54,10 @@ class GameEngine(Listener):
                 self.event_manager.post(QuitEvent())
 
         if self.game_mode == GameModes.MULTI_PLAYER_ONLINE:
-            encoded_event = encode_event(event)
-            self.connection.send(encoded_event)
+            # only events for controls
+            if isinstance(event, (KeyboardPressEvent, KeyboardReleaseEvent)):
+                encoded_event = encode_event(event)
+                self.connection.send(encoded_event)
 
         elif isinstance(event, KeyboardPressEvent) and self.game_mode == GameModes.MULTI_PLAYER_LOCAL:
             self.game_state.handle_start_move_event(key=event.key)
