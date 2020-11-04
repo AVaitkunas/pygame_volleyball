@@ -92,7 +92,6 @@ class ClientThread(Thread):
         while True:
             try:
                 data_received = self.socket.recv(2048) # todo add framing <start_indicator><data_length><payload>
-                print(data_received)
             except Exception as e:
                 print(str(e))
                 break

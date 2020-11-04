@@ -28,7 +28,6 @@ class Network(Listener):
 
         if isinstance(event, TickEvent) and self.connected:
             data = self.client.recv(2048)
-            print(data)
             self.game_info = json.loads(data.decode())
 
 
