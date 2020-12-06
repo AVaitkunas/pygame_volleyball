@@ -35,6 +35,11 @@ PLAYER_GRAVITY = 0.9
 PLAYER_1_CONTROLS = Controls(left=pygame.K_LEFT, right=pygame.K_RIGHT, jump=pygame.K_UP)
 PLAYER_2_CONTROLS = Controls(left=ord('a'), right=ord('d'), jump=ord('w'))
 
+
+FRAME_START = b"\x02"
+FRAME_END = b"\x03"
+
+
 # todo issues:
 #  1. Ball/player needs to be bouncy
 #  2. Change colors of the players

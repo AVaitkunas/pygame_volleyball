@@ -1,4 +1,6 @@
 import json
+import select
+
 import pygame
 import socket
 from collections import deque
@@ -7,10 +9,10 @@ from threading import Thread, Lock
 
 import uuid
 
-from event_manager import KeyboardPressEvent, KeyboardReleaseEvent, TickEvent
+from event_manager import KeyboardPressEvent, KeyboardReleaseEvent
 from game_engine import decode_event
 from models.game_state import GameState
-from settings import FPS
+from settings import FPS, FRAME_START, FRAME_END
 
 
 @dataclass
@@ -51,8 +53,9 @@ class GameThread(Thread):
             self.game_info["ball_y"] = self.game_state.ball.rect.y
 
     def get_game_state_info_message(self):
+        encoded_game_info = b"".join([FRAME_START, json.dumps(self.game_info).encode(), FRAME_END])
         with self.lock:
-            return json.dumps(self.game_info).encode()
+            return encoded_game_info
 
     def handle_tick_event(self):
         with self.lock:
@@ -84,33 +87,44 @@ class ClientThread(Thread):
         super().__init__()
         self.client_info = client_info
         self.socket = client_info.connection
+        self.socket.setblocking(0)
         self.game_state_thread = game_state_thread
         self.lock = Lock()
+        self.clock = pygame.time.Clock()
 
     def run(self):
-
+        game_state_info = self.game_state_thread.get_game_state_info_message()
+        self.socket.send(game_state_info)
         while True:
-            try:
-                data_received = self.socket.recv(2048) # todo add framing <start_indicator><data_length><payload>
-                print(data_received)
-            except Exception as e:
-                print(str(e))
-                break
-            if not data_received:
-                print("Disconnected")
-                break
+            self.clock.tick(FPS)
+            game_state_info = self.game_state_thread.get_game_state_info_message()
+            self.socket.send(game_state_info)
 
-            event, value = decode_event(data_received.decode())
-            with self.lock:
-                if KeyboardPressEvent.__name__ in event:
-                    print(f"{self.client_info.unique_id}: {value}")
-                    self.game_state_thread.handle_start_move(player_id=self.client_info.unique_id, key_value=value)
+            ready, *_ = select.select([self.socket], [], [], 0)
+            if ready:
+                try:
+                    data_received = self.socket.recv(2048)
+                except Exception as e:
+                    print(str(e))
+                    break
 
-                elif KeyboardReleaseEvent.__name__ in event:
-                    self.game_state_thread.handle_end_move(player_id=self.client_info.unique_id, key_value=value)
+                if not data_received:
+                    continue
 
-                game_state_info = self.game_state_thread.get_game_state_info_message()
-                self.socket.send(game_state_info)
+                end_idx = data_received.rfind(FRAME_END)
+                if end_idx == -1:
+                    continue
+                start_idx = data_received[:end_idx].rfind(FRAME_START)
+                if start_idx == -1:
+                    continue
+
+                event, value = decode_event(data_received[start_idx+1:end_idx].decode())
+
+                with self.lock:
+                    if KeyboardPressEvent.__name__ in event:
+                        self.game_state_thread.handle_start_move(player_id=self.client_info.unique_id, key_value=value)
+                    elif KeyboardReleaseEvent.__name__ in event:
+                        self.game_state_thread.handle_end_move(player_id=self.client_info.unique_id, key_value=value)
 
         print("Lost connection")
         self.socket.close()
@@ -190,6 +204,6 @@ class Server:
 
 
 if __name__ == '__main__':
-    server = Server(ip="172.28.10.131", port=5555)
-    # server = Server(ip="192.168.1.227", port=5555)
+    # server = Server(ip="172.28.10.131", port=5555)
+    server = Server(ip="192.168.1.227", port=5555)
     server.run()
