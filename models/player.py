@@ -57,11 +57,15 @@ class Player:
             self.movement.stop_vertical()
 
     def _jump(self):
+        """Make player jump event."""
+
         self.speed_y += PLAYER_GRAVITY
+        # touched the ground
         if self.rect.bottom + self.speed_y >= SCREEN_HEIGHT:
             self.rect = self.rect.move(0, SCREEN_HEIGHT - self.rect.bottom)
             self.movement.in_jump = False
             self.speed_y = PLAYER_SPEED_Y
+
         self.rect = self.rect.move(0, self.speed_y)
 
     def make_move(self):

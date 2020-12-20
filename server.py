@@ -12,7 +12,7 @@ import uuid
 from event_manager import KeyboardPressEvent, KeyboardReleaseEvent
 from game_engine import decode_event
 from models.game_state import GameState
-from settings import FPS, FRAME_START, FRAME_END
+from settings import FPS, FRAME_START, FRAME_END, IP, PORT
 
 
 @dataclass
@@ -205,5 +205,5 @@ class Server:
 
 if __name__ == '__main__':
     # server = Server(ip="172.28.10.131", port=5555)
-    server = Server(ip="192.168.1.227", port=5555)
+    server = Server(ip=IP, port=PORT)
     server.run()

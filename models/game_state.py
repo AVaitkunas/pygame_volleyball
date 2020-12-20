@@ -5,8 +5,8 @@ import pygame
 from models.static_objects import Wall
 from models.ball import Ball
 from models.player import Player
-from settings import WALL_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH, PLAYER_STRENGTH, PLAYER_1_CONTROLS, PLAYER_2_CONTROLS, \
-    NET_HEIGHT, NET_WIDTH
+from settings import (WALL_WIDTH, SCREEN_HEIGHT, SCREEN_WIDTH, PLAYER_STRENGTH, PLAYER_1_CONTROLS,
+                      PLAYER_2_CONTROLS, NET_HEIGHT, NET_WIDTH)
 
 
 class States(Enum):
@@ -17,14 +17,16 @@ class States(Enum):
 
 class GameState:
     def __init__(self):
-
+        # Moving objects
         self.player1 = Player(is_side_left=False, controls=PLAYER_1_CONTROLS)
         self.player2 = Player(is_side_left=True, controls=PLAYER_2_CONTROLS)
         self.ball = Ball()
 
+        # Groups for collision detection with the ball
         self.vertical_walls = pygame.sprite.Group()
         self.horizontal_walls = pygame.sprite.Group()
 
+        # Static objects
         self.net = Wall(
             self.vertical_walls,
             rect=(int(SCREEN_WIDTH / 2) - NET_WIDTH, SCREEN_HEIGHT - NET_HEIGHT, NET_WIDTH * 2, NET_HEIGHT)
@@ -49,10 +51,11 @@ class GameState:
         self.ball = Ball(position=round(position))
 
     def handle_game_tick_event(self):
-        self.handle_ball_collision()
-        self.player1.make_move()
-        self.player2.make_move()
-        self.ball.make_move()
+        if not self.pause:
+            self.handle_ball_collision()
+            self.player1.make_move()
+            self.player2.make_move()
+            self.ball.make_move()
 
     def handle_start_move_event_player_1(self, key):
         if key in list(self.player1.controls):
@@ -100,14 +103,23 @@ class GameState:
             self.player1.consecutive_hits = 0
             self.player2.consecutive_hits += 1
 
-        if pygame.sprite.spritecollide(self.ball, self.vertical_walls, False):
-            self.ball.bounce_x()
+        vertical_collision = pygame.sprite.spritecollide(self.ball, self.vertical_walls, False)
+        horizontal_collision = pygame.sprite.spritecollide(self.ball, self.horizontal_walls, False)
 
-        if pygame.sprite.spritecollide(self.ball, self.horizontal_walls, False):
-            self.ball.bounce_y()
+        if vertical_collision:
+            collided_object = vertical_collision.pop()
+            self.ball.bounce_x(object_rect=collided_object.rect)
+
+        if horizontal_collision:
+            collided_object = horizontal_collision.pop()
+            self.ball.bounce_y(object_rect=collided_object.rect)
 
     def check_game_rules_violation(self):
+        """There are two rules violations: ball hits the ground
+        or the player touches the ball more than 3 times.
+        """
         for player in (self.player1, self.player2):
+            # check in which side does the ball dropped
             if pygame.sprite.collide_rect(self.ball, self.floor):
                 coord_range = (
                     range(int(SCREEN_WIDTH / 2), SCREEN_WIDTH) if player.is_side_left else
@@ -115,13 +127,14 @@ class GameState:
                 )
                 if self.ball.rect.centerx in coord_range:
                     player.won_match = True
-
+        # check if player did more than 3 hits
         if self.player1.consecutive_hits > 3:
             self.player2.won_match = True
         if self.player2.consecutive_hits > 3:
             self.player1.won_match = True
 
     def calculate_points_and_start_new_match(self):
+        """Check if there is point winner."""
         for player in (self.player1, self.player2):
             if player.won_match:
                 player.points += 1

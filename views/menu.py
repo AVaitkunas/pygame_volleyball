@@ -48,7 +48,7 @@ class Menu:
         self.game_menu.mainloop(surface=self.screen)
 
     def set_player_name(self, name):
-        print(f"set player name to {name}")
+        pass
 
     def set_game_mode(self, _, game_mode):
         self.game_mode = game_mode

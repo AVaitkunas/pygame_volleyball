@@ -4,7 +4,7 @@ import socket
 
 from event_manager import Listener, StateChangeEvent
 from models.state_machine import States
-from settings import FRAME_START, FRAME_END
+from settings import FRAME_START, FRAME_END, IP, PORT
 from views.menu import GameModes
 
 
@@ -13,9 +13,7 @@ class Network(Listener):
         super().__init__(event_manager)
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.setblocking(False)
-        self.server = "192.168.1.227"
-        self.port = 5555
-        self.address = (self.server, self.port)
+        self.address = (IP, PORT)
         self.game_info = None
         self.game_engine = game_engine
         self.connected = False
