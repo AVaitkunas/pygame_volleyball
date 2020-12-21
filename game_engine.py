@@ -1,7 +1,7 @@
 import json
 
 from event_manager import TickEvent, InitializeEvent, StateChangeEvent, QuitEvent, Listener, KeyboardPressEvent, \
-    KeyboardReleaseEvent, Event
+    KeyboardReleaseEvent, Event, PauseEvent
 from models.game_state import GameState
 from models.state_machine import StateMachine, States
 from network import Network
@@ -55,7 +55,7 @@ class GameEngine(Listener):
 
         if self.game_mode == GameModes.MULTI_PLAYER_ONLINE:
             # only events for controls
-            if isinstance(event, (KeyboardPressEvent, KeyboardReleaseEvent)):
+            if isinstance(event, (KeyboardPressEvent, KeyboardReleaseEvent, PauseEvent)):
                 encoded_event = encode_event(event)
                 self.connection.send(encoded_event)
 
@@ -65,6 +65,8 @@ class GameEngine(Listener):
             self.game_state.handle_end_move_event(key=event.key)
         elif isinstance(event, TickEvent) and self.game_mode == GameModes.MULTI_PLAYER_LOCAL:
             self.game_state.handle_game_tick_event()
+        elif isinstance(event, PauseEvent) and self.state.peek() == States.STATE_PLAY:
+            self.game_state.pause = not self.game_state.pause
 
     def run(self):
         """Starts the game engine loop.

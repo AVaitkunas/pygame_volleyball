@@ -9,7 +9,7 @@ from threading import Thread, Lock
 
 import uuid
 
-from event_manager import KeyboardPressEvent, KeyboardReleaseEvent
+from event_manager import KeyboardPressEvent, KeyboardReleaseEvent, PauseEvent
 from game_engine import decode_event
 from models.game_state import GameState
 from settings import FPS, FRAME_START, FRAME_END, IP, PORT
@@ -81,6 +81,9 @@ class GameThread(Thread):
             else:
                 raise ValueError("Incorrect player ID provided")
 
+    def handle_pause(self):
+        self.game_state.pause = not self.game_state.pause
+
 
 class ClientThread(Thread):
     def __init__(self, game_state_thread: GameThread, client_info: ClientInfo):
@@ -118,13 +121,15 @@ class ClientThread(Thread):
                 if start_idx == -1:
                     continue
 
-                event, value = decode_event(data_received[start_idx+1:end_idx].decode())
-
+                event, value = decode_event(data_received[start_idx + 1:end_idx].decode())
+                print(event)
                 with self.lock:
                     if KeyboardPressEvent.__name__ in event:
                         self.game_state_thread.handle_start_move(player_id=self.client_info.unique_id, key_value=value)
                     elif KeyboardReleaseEvent.__name__ in event:
                         self.game_state_thread.handle_end_move(player_id=self.client_info.unique_id, key_value=value)
+                    elif PauseEvent.__name__ in event:
+                        self.game_state_thread.handle_pause()
 
         print("Lost connection")
         self.socket.close()

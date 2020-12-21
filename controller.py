@@ -1,6 +1,7 @@
 import pygame
 
-from event_manager import Listener, TickEvent, QuitEvent, StateChangeEvent, KeyboardPressEvent, KeyboardReleaseEvent
+from event_manager import Listener, TickEvent, QuitEvent, StateChangeEvent, KeyboardPressEvent, KeyboardReleaseEvent, \
+    PauseEvent
 from game_engine import States
 
 
@@ -79,6 +80,9 @@ class KeyboardController(Listener):
 
         if event.key in [pygame.K_LEFT, pygame.K_RIGHT, pygame.K_UP, ord('a'), ord('d'), ord('w')]:
             self.event_manager.post(KeyboardPressEvent(key=event.key))
+
+        if event.key == ord('p'):
+            self.event_manager.post(PauseEvent())
 
     def key_up_events_play(self, event):
         """Handles play key events"""

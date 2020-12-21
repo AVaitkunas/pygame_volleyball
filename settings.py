@@ -50,6 +50,7 @@ PORT = 5555
 #  * Ball sometimes stucks into the net if lands directly from above
 #  * add a popup when one player wins (reaches 21 or sth).
 #  * add 3s pause after game point
-#  * implement pause
+#  * when pause is active while multiplayer -> only one window will see "PAUSED" on the screen.
 #  * REFACTOR THE GAME
 #  * implement computer player
+

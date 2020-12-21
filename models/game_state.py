@@ -17,6 +17,9 @@ class States(Enum):
 
 class GameState:
     def __init__(self):
+        # pause
+        self.pause = False
+
         # Moving objects
         self.player1 = Player(is_side_left=False, controls=PLAYER_1_CONTROLS)
         self.player2 = Player(is_side_left=True, controls=PLAYER_2_CONTROLS)

@@ -2,10 +2,10 @@ from typing import Tuple
 
 import pygame
 
-from event_manager import Listener, EventManager, InitializeEvent, QuitEvent, TickEvent, StateChangeEvent
+from event_manager import Listener, EventManager, InitializeEvent, QuitEvent, TickEvent, StateChangeEvent, PauseEvent
 from game_engine import GameEngine, States
 from views.ball_view import BallView
-from views.menu import Menu, MenuActions, GameModes
+from views.menu import Menu, MenuActions
 from views.net_view import NetView
 from views.player_view import PlayerView
 
@@ -46,6 +46,8 @@ class GraphicalView(Listener):
         self.ball_view = None
         self.net_view = None
 
+        self.pause = False
+
     def notify(self, event):
         """Receive events posted to the message queue"""
 
@@ -70,6 +72,9 @@ class GraphicalView(Listener):
             pygame.display.flip()
             # limit the redraw speed to 30 frames per second
             self.clock.tick(self.fps)
+
+        elif isinstance(event, PauseEvent):
+            self.pause = not self.pause
 
     def render_menu(self):
         """Render the game menu"""
@@ -103,6 +108,9 @@ class GraphicalView(Listener):
         self.net_view.render(
             destination_rect=self.model.game_state.net.rect
         )
+
+        if self.pause:
+            self.player_view.render_message("PAUSED")
 
     def initialize(self):
         """Set up the pygame graphical display and loads graphical resources"""

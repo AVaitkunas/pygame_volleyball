@@ -72,6 +72,11 @@ class KeyboardReleaseEvent(Event):
         return f"{self.__class__.__name__}(key='{self.key}')"
 
 
+class PauseEvent(Event):
+    """Game Pause event."""
+    pass
+
+
 class InitializeEvent(Event):
     """Tells all listeners to initialize themselves. This includes loading libraries and resources.
 

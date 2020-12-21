@@ -1,6 +1,6 @@
 import pygame
 
-from settings import PLAYER_SIZE, SCREEN_WIDTH
+from settings import PLAYER_SIZE, SCREEN_WIDTH, SCREEN_HEIGHT
 
 
 class PlayerView:
@@ -21,3 +21,9 @@ class PlayerView:
         points_text = self.font.render(str(points), False, pygame.Color("black"))
         points_rect = (SCREEN_WIDTH / 4 if is_side_left else SCREEN_WIDTH / 4 * 3, 0)
         self.surface.blit(points_text, points_rect)
+
+    def render_message(self, message):
+        """Display PAUSE if pause active"""
+        text = self.font.render(message, False, pygame.Color("black"))
+        text_rect = text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/8))
+        self.surface.blit(text, text_rect)
